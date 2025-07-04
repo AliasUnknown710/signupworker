@@ -1,4 +1,4 @@
-import { main, handle_signup } from './signupw2.js';
+import { main, handle_signup } from './signupworker.js';
 
 // Cloudflare Worker expects a fetch handler
 export default {
