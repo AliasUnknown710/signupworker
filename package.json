@@ -1,0 +1,42 @@
+{
+  "name": "signup-worker",
+  "version": "1.0.0",
+  "description": "A secure Cloudflare Worker for handling user signup with rate limiting and CAPTCHA protection",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "test": "node --test",
+    "format": "prettier --write .",
+    "lint": "eslint .",
+    "preview": "wrangler preview"
+  },
+  "keywords": [
+    "cloudflare-worker",
+    "signup",
+    "authentication",
+    "rate-limiting",
+    "captcha",
+    "security"
+  ],
+  "author": "Alex L",
+  "license": "MIT",
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20241106.0",
+    "eslint": "^8.57.0",
+    "prettier": "^3.1.0",
+    "wrangler": "^3.78.12"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/username/signup-worker.git"
+  },
+  "bugs": {
+    "url": "https://github.com/username/signup-worker/issues"
+  },
+  "homepage": "https://github.com/username/signup-worker#readme"
+}

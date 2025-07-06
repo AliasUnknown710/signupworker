@@ -1,0 +1,49 @@
+name = "signup-worker"
+main = "index.js"
+compatibility_date = "2024-11-06"
+compatibility_flags = ["nodejs_compat"]
+
+# Account ID (replace with your Cloudflare account ID)
+account_id = "your-account-id-here"
+
+# Worker settings
+workers_dev = true
+
+# KV Namespaces
+[[kv_namespaces]]
+binding = "RATE_LIMIT_KV"
+id = "your-kv-namespace-id-here"
+preview_id = "your-preview-kv-namespace-id-here"
+
+# Environment variables (secrets should be set via CLI)
+[vars]
+# BACKEND_URL and RECAPTCHA_SECRET should be set as secrets:
+# wrangler secret put BACKEND_URL
+# wrangler secret put RECAPTCHA_SECRET
+
+# Development configuration
+[env.development]
+name = "signup-worker-dev"
+workers_dev = true
+
+[[env.development.kv_namespaces]]
+binding = "RATE_LIMIT_KV"
+id = "your-dev-kv-namespace-id-here"
+
+# Production configuration
+[env.production]
+name = "signup-worker-prod"
+workers_dev = false
+route = "api.yourdomain.com/signup"
+
+[[env.production.kv_namespaces]]
+binding = "RATE_LIMIT_KV"
+id = "your-prod-kv-namespace-id-here"
+
+# Build configuration
+[build]
+command = ""
+
+# Limits
+[limits]
+cpu_ms = 50
