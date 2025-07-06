@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SignUp Worker Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+        }
+        input[type="url"], input[type="email"], input[type="text"], input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        input.invalid {
+            border-color: #dc3545;
+        }
+        input.valid {
+            border-color: #28a745;
+        }
+        button {
+            background-color: #007cba;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #005a87;
+        }
+        button:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 4px;
+            white-space: pre-wrap;
+            font-family: monospace;
+        }
+        .success {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+        .error {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        .info {
+            background-color: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+            margin-bottom: 20px;
+        }
+        .validation-message {
+            font-size: 12px;
+            margin-top: 5px;
+        }
+        .validation-message.error {
+            color: #dc3545;
+        }
+        .validation-message.success {
+            color: #28a745;
+        }
+        .password-toggle {
+            position: relative;
+        }
+        .password-toggle button {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #007cba;
+            cursor: pointer;
+            padding: 0;
+            font-size: 12px;
+        }
+        .password-requirements {
+            font-size: 12px;
+            color: #6c757d;
+            margin-top: 5px;
+        }
+        .password-requirements ul {
+            margin: 5px 0;
+            padding-left: 20px;
+        }
+        .password-requirements li {
+            margin: 2px 0;
+        }
+        .requirement-met {
+            color: #28a745;
+        }
+        .requirement-unmet {
+            color: #dc3545;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>SignUp Worker Test</h1>
+        
+        <div class="info">
+            <strong>ℹ️ Info:</strong> Register a new user account with the signup worker.
+        </div>
+
+        <form id="signupForm">
+            <div class="form-group">
+                <label for="workerUrl">Worker URL:</label>
+                <input type="url" id="workerUrl" value="https://your-worker.your-subdomain.workers.dev" required>
+            </div>
+
+            <div class="form-group">
+                <label for="username">Username:</label>
+                <input type="text" id="username" placeholder="Enter username (3-30 chars, letters/numbers/_)" required>
+                <div id="usernameValidation" class="validation-message"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" id="email" placeholder="user@example.com" required>
+                <div id="emailValidation" class="validation-message"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="fullName">Full Name:</label>
+                <input type="text" id="fullName" placeholder="John Doe" required>
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password:</label>
+                <div class="password-toggle">
+                    <input type="password" id="password" placeholder="Enter a strong password" required>
+                    <button type="button" onclick="togglePassword()">Show</button>
+                </div>
+                <div class="password-requirements">
+                    <strong>Password must contain:</strong>
+                    <ul id="passwordRequirements">
+                        <li id="req-length" class="requirement-unmet">At least 8 characters</li>
+                        <li id="req-upper" class="requirement-unmet">One uppercase letter</li>
+                        <li id="req-lower" class="requirement-unmet">One lowercase letter</li>
+                        <li id="req-number" class="requirement-unmet">One number</li>
+                        <li id="req-special" class="requirement-unmet">One special character</li>
+                    </ul>
+                </div>
+            </div>
+
+            <button type="submit" id="submitBtn">Create Account</button>
+        </form>
+
+        <div id="result" class="result" style="display: none;"></div>
+    </div>
+
+    <script>
+        function togglePassword() {
+            const passwordField = document.getElementById('password');
+            const toggleBtn = passwordField.nextElementSibling;
+            
+            if (passwordField.type === 'password') {
+                passwordField.type = 'text';
+                toggleBtn.textContent = 'Hide';
+            } else {
+                passwordField.type = 'password';
+                toggleBtn.textContent = 'Show';
+            }
+        }
+
+        // Username validation
+        document.getElementById('username').addEventListener('input', function(e) {
+            const username = e.target.value;
+            const usernameRegex = /^[a-zA-Z][a-zA-Z0-9_]{2,29}$/;
+            const validation = document.getElementById('usernameValidation');
+            
+            if (username.length === 0) {
+                e.target.className = '';
+                validation.textContent = '';
+            } else if (usernameRegex.test(username)) {
+                e.target.className = 'valid';
+                validation.textContent = '✓ Username is valid';
+                validation.className = 'validation-message success';
+            } else {
+                e.target.className = 'invalid';
+                validation.textContent = '✗ Username must be 3-30 chars, start with letter, contain only letters/numbers/_';
+                validation.className = 'validation-message error';
+            }
+        });
+
+        // Email validation
+        document.getElementById('email').addEventListener('input', function(e) {
+            const email = e.target.value;
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            const validation = document.getElementById('emailValidation');
+            
+            if (email.length === 0) {
+                e.target.className = '';
+                validation.textContent = '';
+            } else if (emailRegex.test(email)) {
+                e.target.className = 'valid';
+                validation.textContent = '✓ Email format is valid';
+                validation.className = 'validation-message success';
+            } else {
+                e.target.className = 'invalid';
+                validation.textContent = '✗ Please enter a valid email address';
+                validation.className = 'validation-message error';
+            }
+        });
+
+        // Password validation
+        document.getElementById('password').addEventListener('input', function(e) {
+            const password = e.target.value;
+            
+            // Check each requirement
+            const requirements = {
+                length: password.length >= 8,
+                upper: /[A-Z]/.test(password),
+                lower: /[a-z]/.test(password),
+                number: /\d/.test(password),
+                special: /[!@#$%^&*(),.?":{}|<>]/.test(password)
+            };
+
+            // Update requirement indicators
+            Object.keys(requirements).forEach(req => {
+                const element = document.getElementById(`req-${req}`);
+                if (requirements[req]) {
+                    element.className = 'requirement-met';
+                } else {
+                    element.className = 'requirement-unmet';
+                }
+            });
+
+            // Update input styling
+            const allMet = Object.values(requirements).every(met => met);
+            if (password.length === 0) {
+                e.target.className = '';
+            } else if (allMet) {
+                e.target.className = 'valid';
+            } else {
+                e.target.className = 'invalid';
+            }
+        });
+
+        document.getElementById('signupForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const submitBtn = document.getElementById('submitBtn');
+            const resultDiv = document.getElementById('result');
+            const workerUrl = document.getElementById('workerUrl').value;
+            const username = document.getElementById('username').value;
+            const email = document.getElementById('email').value;
+            const fullName = document.getElementById('fullName').value;
+            const password = document.getElementById('password').value;
+            
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Creating Account...';
+            resultDiv.style.display = 'none';
+            
+            try {
+                const response = await fetch(workerUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        username: username,
+                        email: email,
+                        fullName: fullName,
+                        password: password
+                    })
+                });
+                
+                const responseText = await response.text();
+                let responseData;
+                
+                try {
+                    responseData = JSON.parse(responseText);
+                } catch {
+                    responseData = responseText;
+                }
+                
+                resultDiv.style.display = 'block';
+                resultDiv.className = 'result ' + (response.ok ? 'success' : 'error');
+                
+                resultDiv.textContent = `Status: ${response.status} ${response.statusText}\n\n` +
+                    `Response:\n${JSON.stringify(responseData, null, 2)}`;
+                
+                if (response.ok) {
+                    // Clear form on success
+                    document.getElementById('signupForm').reset();
+                    // Clear validation classes
+                    document.querySelectorAll('input').forEach(input => input.className = '');
+                    document.querySelectorAll('.validation-message').forEach(msg => {
+                        msg.textContent = '';
+                        msg.className = 'validation-message';
+                    });
+                    // Reset password requirements
+                    document.querySelectorAll('#passwordRequirements li').forEach(li => {
+                        li.className = 'requirement-unmet';
+                    });
+                }
+                
+            } catch (error) {
+                resultDiv.style.display = 'block';
+                resultDiv.className = 'result error';
+                resultDiv.textContent = `Error: ${error.message}`;
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Create Account';
+            }
+        });
+    </script>
+</body>
+</html>
